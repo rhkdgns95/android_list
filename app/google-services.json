@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "799569920524",
+    "firebase_url": "https://howltalk-5971f.firebaseio.com",
+    "project_id": "howltalk-5971f",
+    "storage_bucket": "howltalk-5971f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:799569920524:android:158f7128e59ed032b9a429",
+        "android_client_info": {
+          "package_name": "com.example.listactivity"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "799569920524-91opb3aknlt35q55o8omhouap2dq6eqn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCY0KnhUDZvV-zSxnICgd0L47g6eCf3o_w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "799569920524-91opb3aknlt35q55o8omhouap2dq6eqn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
