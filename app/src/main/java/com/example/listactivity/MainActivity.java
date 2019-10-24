@@ -145,6 +145,14 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
+
+        /**
+         *  getMessage(position): 선택한 메시지 읽기.
+         *  @param position: DB에 속한 값.
+         */
+        void getMessage(final int position) {
+            Toast.makeText(MainActivity.this, (position + 1) + "번째 텍스트: ", Toast.LENGTH_SHORT).show();
+        }
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position) {
             String message = comments.get(position).message;
@@ -157,6 +165,16 @@ public class MainActivity extends AppCompatActivity {
 
             messageViewHolder.textView_message.setText(message);
             messageViewHolder.textView_timestamp.setText(time);
+            messageViewHolder.linearLayout_main.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    getMessage(position);
+                    return true;
+                }
+            });
+
+            // 추가하도록한다.
+            // messageViewHolder.textView_message.setBackground(R.drawable.message_bubble_right);
             messageViewHolder.textView_message.setTextSize(25);
 
             messageViewHolder.linearLayout_main.setGravity(Gravity.RIGHT);
@@ -187,6 +205,4 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
-
 }
