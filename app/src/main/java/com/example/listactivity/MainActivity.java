@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import com.example.listactivity.model.ChatModel;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -83,9 +84,27 @@ public class MainActivity extends AppCompatActivity {
         subscribeMessage();
     }
     void subscribeMessage () {
-        FirebaseDatabase.getInstance().getReference().child("chatrooms").addListenerForSingleValueEvent(new ValueEventListener() {
+        FirebaseDatabase.getInstance().getReference().child("chatrooms").child("comments").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                /**
+                 *  if(dataSnapshot.getValue() == null){}
+                 *
+                 *  초기의 데이터가 없는경우,
+                 *  메시지를 계속해서 구독한다.
+                 */
+                if(dataSnapshot.getValue() == null) {
+                    FirebaseDatabase.getInstance().getReference().child("chatrooms").child("comments").push();
+                    ChatModel chat= new ChatModel();
+                    FirebaseDatabase.getInstance().getReference().child("chatrooms").push().setValue(chat).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            subscribeMessage();
+                        }
+                    });
+                    return;
+                }
+
                 for(DataSnapshot item : dataSnapshot.getChildren()) {
                     recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
                     recyclerView.setAdapter(new RecyclerViewAdapter());
@@ -110,6 +129,7 @@ public class MainActivity extends AppCompatActivity {
 
         public RecyclerViewAdapter() {
             comments = new ArrayList<>();
+//            getMessageList();
             getMessageList();
         }
         /**
@@ -123,7 +143,6 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     comments.clear(); // clear하지 않으면, 중복된 내용들이 쌓이게됨.
-                    int i = 0;
                     for(DataSnapshot item : dataSnapshot.getChildren()) {
                         String key = item.getKey();
                         ChatModel.Comment comment = item.getValue(ChatModel.Comment.class);
@@ -131,6 +150,7 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     if(comments.size() == 0) {
+                        notifyDataSetChanged();// 새로운 데이터를 갱신.
                         // 저장된 내용이 없는경우.
                         return;
                     } else {
