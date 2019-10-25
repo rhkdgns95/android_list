@@ -30,10 +30,13 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -44,6 +47,9 @@ public class MainActivity extends AppCompatActivity {
     private EditText editText;
     private RecyclerView recyclerView;
 
+    private Map<String, Object> messages = new HashMap<>();
+    private ArrayList keyArr = new ArrayList();
+
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm");
 
     @Override
@@ -52,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         button = (Button) findViewById(R.id.mainactivity_button);
-        final EditText editText = (EditText) findViewById(R.id.mainactivity_edittext);
+        editText = (EditText) findViewById(R.id.mainactivity_edittext);
         recyclerView = (RecyclerView) findViewById(R.id.mainactivity_recyclerview);
 
         button.setOnClickListener(new View.OnClickListener() {
@@ -129,7 +135,6 @@ public class MainActivity extends AppCompatActivity {
 
         public RecyclerViewAdapter() {
             comments = new ArrayList<>();
-//            getMessageList();
             getMessageList();
         }
         /**
@@ -142,11 +147,15 @@ public class MainActivity extends AppCompatActivity {
             ValueEventListener valueEventListener = databaseReference.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    comments.clear(); // clear하지 않으면, 중복된 내용들이 쌓이게됨.
+                    // clear하지 않으면, 중복된 내용들이 쌓이게됨.
+                    comments.clear();
+                    keyArr.clear();
                     for(DataSnapshot item : dataSnapshot.getChildren()) {
                         String key = item.getKey();
                         ChatModel.Comment comment = item.getValue(ChatModel.Comment.class);
                         comments.add(comment);
+                        keyArr.add(key);
+                        messages.put(key, comment);
                     }
 
                     if(comments.size() == 0) {
@@ -169,9 +178,23 @@ public class MainActivity extends AppCompatActivity {
         /**
          *  getMessage(position): 선택한 메시지 읽기.
          *  @param position: DB에 속한 값.
+         *
+         *
+         *  클릭한 position값과 일치하는
+         *  쿼리를 조회해서 해당 key값을 가져와 제거한다.
          */
         void getMessage(final int position) {
-            Toast.makeText(MainActivity.this, (position + 1) + "번째 텍스트: ", Toast.LENGTH_SHORT).show();
+            String keyPath = keyArr.get(position).toString();
+
+            Log.d("제거될 Key: ", keyPath);
+
+            FirebaseDatabase.getInstance().getReference().child("chatrooms").child("comments").child(keyPath).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    String msg = (position + 1) + "번째 텍스트 제거";
+                    Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+                }
+            });
         }
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position) {
@@ -185,6 +208,7 @@ public class MainActivity extends AppCompatActivity {
 
             messageViewHolder.textView_message.setText(message);
             messageViewHolder.textView_timestamp.setText(time);
+
             messageViewHolder.linearLayout_main.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
@@ -192,7 +216,6 @@ public class MainActivity extends AppCompatActivity {
                     return true;
                 }
             });
-
             // 추가하도록한다.
             // messageViewHolder.textView_message.setBackground(R.drawable.message_bubble_right);
             messageViewHolder.textView_message.setTextSize(25);
